@@ -1,0 +1,31 @@
+body {
+    font-family: "Microsoft Yahei", sans-serif;
+    background: linear-gradient(to right, #83a4d4, #b6fbff);
+    text-align: center;
+    padding-top: 100px;
+}
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 350px;
+    margin: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+input {
+    padding: 8px;
+    width: 200px;
+}
+button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+}
+.error {
+    color: red;
+}
+.result {
+    margin-top: 20px;
+}
