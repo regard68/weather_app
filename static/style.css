@@ -4,28 +4,60 @@ body {
     text-align: center;
     padding-top: 100px;
 }
+
+/* ✅ 加宽容器，让页面不挤 */
 .container {
     background: white;
     padding: 30px;
-    border-radius: 12px;
-    width: 350px;
+    border-radius: 14px;
+    width: 420px; /* 从 350 增加到 420，提示文本就不会被挤掉 */
     margin: auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    box-shadow: 0 0 12px rgba(0,0,0,0.18);
 }
+
+/* ✅ 输入框加宽、居中、圆角、美化 */
 input {
-    padding: 8px;
-    width: 200px;
+    padding: 10px;
+    width: 80%;         /* 占容器宽度，让适配更柔和 */
+    max-width: 360px;   /* 控制最大宽度，防止过宽 */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    text-align: center;
+    outline: none;
 }
+
+/* ✅ 鼠标点击输入框时边框高亮 */
+input:focus {
+    border-color: #007bff;
+}
+
+/* ✅ 按钮美化 + 鼠标悬停效果 */
 button {
-    padding: 8px 15px;
+    padding: 10px 20px;
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-left: 8px;
 }
+
+button:hover {
+    background-color: #005dc1;
+}
+
+/* 错误提示样式 */
 .error {
-    color: red;
+    margin-top: 15px;
+    color: #d80000;
+    font-weight: bold;
 }
+
+/* 查询结果区域 */
 .result {
-    margin-top: 20px;
+    margin-top: 22px;
+    line-height: 1.8;
+    font-size: 16px;
 }
