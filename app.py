@@ -3,11 +3,8 @@ import requests, os, re
 
 app = Flask(__name__)
 
-<<<<<<< HEAD
-API_KEY = "YOUR_API_KEY"  # 在这里替换为你自己的API Key
-=======
-API_KEY = "你的WeatherAPI_Key"  # ← 填你自己的 key
->>>>>>> 93d6dd410a0e029d460b0e2a4f07679934dc2f71
+# 优先用环境变量（更安全），没有就用占位符字符串
+API_KEY = os.getenv("WEATHER_API_KEY", "YOUR_API_KEY")
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 # 英文省份/直辖市 -> 中文
@@ -24,136 +21,126 @@ REGION_CN = {
 }
 COUNTRY_CN = {"China": "中国", "中国": "中国"}
 
-MUNICIPALITIES = {"北京", "天津", "上海", "重庆"}
-
 def to_cn_region(region_en: str) -> str:
     return REGION_CN.get(region_en, region_en or "")
 
 def to_cn_country(country: str) -> str:
     return COUNTRY_CN.get(country, country or "")
 
-def norm_cn(s: str) -> str:
-    """去掉常见后缀与空白做匹配"""
+# 一些“拼音 → 英文城市名”的兜底映射（不全，常见特例先覆盖）
+PINYIN_TO_EN = {
+    "haerbin": "Harbin",          # 哈尔滨
+    "xian": "Xi'an",              # 西安
+    "urumqi": "Ürümqi",           # 乌鲁木齐（英文常用 Urumqi/Ürümqi）
+    "wulumuqi": "Ürümqi",
+    "huhehaote": "Hohhot",        # 呼和浩特
+    "guiyang": "Guiyang",
+    "guangzhou": "Guangzhou",
+    "hangzhou": "Hangzhou",
+    "nanjing": "Nanjing",
+    "shenyang": "Shenyang",
+    "changchun": "Changchun",
+    "changsha": "Changsha",
+    "chengdu": "Chengdu",
+    "chongqing": "Chongqing",
+    "beijing": "Beijing",
+    "tianjin": "Tianjin",
+    "shanghai": "Shanghai",
+    "xuzhou": "Xuzhou",
+    "weifang": "Weifang",
+    "qingdao": "Qingdao",
+    "jinan": "Jinan",
+    "wuhan": "Wuhan",
+    "zhengzhou": "Zhengzhou",
+    "taiyuan": "Taiyuan",
+    "xining": "Xining",
+    "ningbo": "Ningbo",
+    "kunming": "Kunming",
+    "lanzhou": "Lanzhou",
+    "baotou": "Baotou",
+    "fuzhou": "Fuzhou",
+    "xiamen": "Xiamen",
+    "haikou": "Haikou",
+    "sanya": "Sanya",
+}
+
+def normalize_query(raw: str) -> str:
+    """把用户输入规范化：
+       - 如果是纯拼音(a-z/空格/连字符)，尝试做特例映射，否则直接用原拼音
+       - 一律在查询时加上 'China' 以限定在中国
+    """
+    s = (raw or "").strip()
     if not s:
         return ""
-    s = s.strip().lower()
-    for suf in ["省", "市", "地区", "盟", "区", "县", "自治州", "自治区", "特别行政区"]:
-        s = s.replace(suf, "")
-    s = s.replace(" ", "")
-    return s
 
-def parse_input(s: str):
-    """要求输入“省份 市名”，或直辖市“北京 北京”这种。支持空格/全角空格/逗号分隔。"""
-    s = (s or "").strip()
-    if not s:
-        return None, None
-    parts = re.split(r"[,\s，、]+", s)
-    if len(parts) < 2:
-        return None, None
-    prov, city = parts[0], parts[1]
-    return prov, city
+    # 纯英文/拼音？
+    if re.fullmatch(r"[a-zA-Z\s\-'.]+", s):
+        key = s.lower().replace(" ", "").replace("-", "")
+        # 特例映射（如 haerbin -> Harbin）
+        if key in PINYIN_TO_EN:
+            return PINYIN_TO_EN[key] + ", China"
+        # 有些需要加撇或大小写的：尝试几种常见变体
+        if key == "xian":
+            return "Xi'an, China"
+        # 默认直接用原始输入（WeatherAPI 对常见城市英文/拼音较友好）
+        return s + ", China"
 
-def pick_city_in_china(prov_in: str, city_in: str, candidates: list):
-    """从 search.json 候选中：限定中国；省+市双匹配（中文），减少跳错县镇。"""
-    prov_n = norm_cn(prov_in)
-    city_n = norm_cn(city_in)
+    # 含有中文就直接原样 + China 限定
+    return s + ", China"
 
-    # 只保留中国
-    cn_list = [c for c in candidates if c.get("country") in ("China", "中国")]
-    if not cn_list:
-        return None
-
-    # 先把候选的省份转中文后再做省/市匹配
-    def region_cn(c):
-        return to_cn_region(c.get("region", ""))
-
-    # 完整匹配（省包含 & 市名相等/包含）
-    strong = [
-        c for c in cn_list
-        if prov_n in norm_cn(region_cn(c)) and
-           (norm_cn(c["name"]) == city_n or city_n in norm_cn(c["name"]))
-    ]
-    if strong:
-        return strong[0]
-
-    # 次匹配：只要省份能对上
-    by_prov = [c for c in cn_list if prov_n in norm_cn(region_cn(c))]
-    if by_prov:
-        # 里边优先市级（region含“省/市/自治区/特别行政区”）
-        def score(c):
-            r = region_cn(c)
-            if any(k in r for k in ("省", "自治区", "特别行政区")): return 3
-            if "市" in r: return 2
-            return 1
-        by_prov.sort(key=score, reverse=True)
-        return by_prov[0]
-
-    # 再次兜底：只要市名近似 + 在中国
-    by_city = [c for c in cn_list if city_n in norm_cn(c["name"])]
-    if by_city:
-        return by_city[0]
-
-    # 最后兜底
-    return cn_list[0]
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 93d6dd410a0e029d460b0e2a4f07679934dc2f71
 @app.route("/", methods=["GET", "POST"])
 def index():
     weather = None
-    hint = "请输入完整的“省份 市名”，例如：山东 潍坊 / 黑龙江 哈尔滨 / 北京 北京"
+    hint = "请输入城市拼音（或中文），例如：beijing / shanghai / weifang / haerbin / 西安 / 潍坊"
 
     if request.method == "POST":
         raw = request.form.get("city", "").strip()
-        prov_in, city_in = parse_input(raw)
+        q = normalize_query(raw)
 
-        if not prov_in or not city_in:
+        if not q:
             weather = {"error": hint}
         else:
             try:
-                # 1) 搜索（先按市名搜，再结合省筛选）
+                # 1) search：限定在 China（normalize_query 已加 , China）
                 s_url = "https://api.weatherapi.com/v1/search.json"
-                resp = requests.get(s_url,
-                                    params={"key": API_KEY, "q": city_in},
-                                    headers=HEADERS, timeout=10)
+                resp = requests.get(s_url, params={"key": API_KEY, "q": q}, headers=HEADERS, timeout=10)
                 items = resp.json()
                 if not isinstance(items, list) or not items:
                     weather = {"error": f"未找到：{raw}。{hint}"}
                 else:
-                    pick = pick_city_in_china(prov_in, city_in, items)
+                    # 只取 country 为 China 的第一个
+                    pick = next((c for c in items if c.get("country") in ("China", "中国")), None)
                     if not pick:
                         weather = {"error": f"未匹配到中国境内城市：{raw}。{hint}"}
                     else:
                         # 2) 用挑中的城市查实时天气
                         n_url = "https://api.weatherapi.com/v1/current.json"
-                        r2 = requests.get(n_url,
-                                          params={"key": API_KEY, "q": pick["name"], "lang": "zh", "aqi": "no"},
-                                          headers=HEADERS, timeout=10)
+                        r2 = requests.get(
+                            n_url,
+                            params={"key": API_KEY, "q": pick["name"], "lang": "zh", "aqi": "no"},
+                            headers=HEADERS,
+                            timeout=10,
+                        )
                         data = r2.json()
                         if "current" not in data:
                             msg = data.get("error", {}).get("message", "查询失败，请稍后重试。")
                             weather = {"error": msg}
                         else:
                             cur = data["current"]
-                            # 展示顺序：省份 -> 市
                             prov_cn = to_cn_region(pick.get("region", ""))
                             country_cn = to_cn_country(pick.get("country", ""))
-
                             weather = {
                                 "city": f"{prov_cn} {pick['name']} {country_cn}".strip(),
-                                "temp": cur["temp_c"],
-                                "desc": cur["condition"]["text"],
-                                "humidity": cur["humidity"],
-                                "wind": f'{cur["wind_dir"]} {cur["wind_kph"]} km/h',
-                                "updated": cur["last_updated"],
+                                "temp": cur.get("temp_c"),
+                                "desc": cur.get("condition", {}).get("text", ""),
+                                "humidity": cur.get("humidity"),
+                                "wind": f"{cur.get('wind_dir','')} {cur.get('wind_kph','')} km/h".strip(),
+                                "updated": cur.get("last_updated"),
                             }
             except Exception as e:
                 weather = {"error": f"请求失败：{e}"}
 
     return render_template("index.html", weather=weather, hint=hint)
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

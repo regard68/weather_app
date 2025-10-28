@@ -13,7 +13,7 @@
       <input
         type="text"
         name="city"
-        placeholder="{{ hint }}"
+        placeholder="请输入城市拼音或中文（例如：beijing / shanghai / 西安）"
         value="{{ request.form.get('city','') }}"
         required
       />
@@ -26,15 +26,14 @@
       {% else %}
         <div class="result">
           <h2>{{ weather.city }}</h2>
-          <p>温度：{{ weather.temp }}°C</p>
-          <p>天气：{{ weather.desc }}</p>
-          <p>湿度：{{ weather.humidity }}%</p>
-          <p>风向风速：{{ weather.wind }}</p>
-          <p>更新时间：{{ weather.updated }}</p>
+          <p><strong>温度：</strong>{{ weather.temp }}°C</p>
+          <p><strong>天气：</strong>{{ weather.desc }}</p>
+          <p><strong>湿度：</strong>{{ weather.humidity }}%</p>
+          <p><strong>风向风速：</strong>{{ weather.wind }}</p>
+          <p><strong>更新时间：</strong>{{ weather.updated }}</p>
         </div>
       {% endif %}
     {% endif %}
   </div>
 </body>
 </html>
-
