@@ -3,7 +3,7 @@ import requests, os, re
 
 app = Flask(__name__)
 
-API_KEY = "你的WeatherAPI_Key"  # ← 填你自己的 key
+API_KEY = "YOUR_API_KEY"  # 在这里替换为你自己的API Key
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 # 英文省份/直辖市 -> 中文
