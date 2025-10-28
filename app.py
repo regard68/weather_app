@@ -3,7 +3,11 @@ import requests, os, re
 
 app = Flask(__name__)
 
+<<<<<<< HEAD
 API_KEY = "YOUR_API_KEY"  # 在这里替换为你自己的API Key
+=======
+API_KEY = "你的WeatherAPI_Key"  # ← 填你自己的 key
+>>>>>>> 93d6dd410a0e029d460b0e2a4f07679934dc2f71
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 # 英文省份/直辖市 -> 中文
@@ -92,6 +96,10 @@ def pick_city_in_china(prov_in: str, city_in: str, candidates: list):
     # 最后兜底
     return cn_list[0]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93d6dd410a0e029d460b0e2a4f07679934dc2f71
 @app.route("/", methods=["GET", "POST"])
 def index():
     weather = None
