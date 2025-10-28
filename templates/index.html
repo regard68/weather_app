@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>天气查询小助手</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h1>🌤 天气查询小助手</h1>
+
+    <form method="POST">
+      <input
+        type="text"
+        name="city"
+        placeholder="{{ hint }}"
+        value="{{ request.form.get('city','') }}"
+        required
+      />
+      <button type="submit">查询</button>
+    </form>
+
+    {% if weather %}
+      {% if weather.error %}
+        <p class="error">{{ weather.error }}</p>
+      {% else %}
+        <div class="result">
+          <h2>{{ weather.city }}</h2>
+          <p>温度：{{ weather.temp }}°C</p>
+          <p>天气：{{ weather.desc }}</p>
+          <p>湿度：{{ weather.humidity }}%</p>
+          <p>风向风速：{{ weather.wind }}</p>
+          <p>更新时间：{{ weather.updated }}</p>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</body>
+</html>
+
