@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>天气查询小助手</title>
-  <link rel="stylesheet" href="{{ url_for('static, filename='style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
   <div class="container">
@@ -13,7 +13,7 @@
       <input
         type="text"
         name="city"
-        placeholder="{{ hint or '请输入城市拼音或英文（例如：beijing / shanghai / xian / chengdu）' }}"
+        placeholder="{{ hint }}"
         value="{{ request.form.get('city','') }}"
         required
       />
