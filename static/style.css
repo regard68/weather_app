@@ -1,63 +1,169 @@
-body {
-    font-family: "Microsoft Yahei", sans-serif;
-    background: linear-gradient(to right, #83a4d4, #b6fbff);
-    text-align: center;
-    padding-top: 100px;
+/* ===== 基础与主题 ===== */
+:root{
+  --bg-start: #c7d2fe;   /* indigo-200 */
+  --bg-end:   #e0e7ff;   /* indigo-100 */
+  --card-bg:  #ffffff;
+  --text:     #0f172a;   /* slate-900 */
+  --muted:    #475569;   /* slate-600 */
+  --primary:  #2563eb;   /* blue-600 */
+  --primary-press: #1d4ed8;
+  --ring:     rgba(37,99,235,0.35);
+  --error:    #dc2626;
+  --shadow:   0 8px 24px rgba(15, 23, 42, 0.08);
+  --radius:   18px;
 }
 
-/* ✅ 加宽容器，让页面不挤 */
-.container {
-    background: white;
-    padding: 30px;
-    border-radius: 14px;
-    width: 420px; /* 从 350 增加到 420，提示文本就不会被挤掉 */
-    margin: auto;
-    box-shadow: 0 0 12px rgba(0,0,0,0.18);
+/* 深色模式自动适配 */
+@media (prefers-color-scheme: dark) {
+  :root{
+    --bg-start: #0b1220;
+    --bg-end:   #161e2e;
+    --card-bg:  #0f172a;
+    --text:     #e2e8f0;
+    --muted:    #94a3b8;
+    --primary:  #60a5fa;
+    --primary-press: #3b82f6;
+    --ring:     rgba(96,165,250,0.4);
+    --shadow:   0 10px 26px rgba(0,0,0,0.35);
+  }
 }
 
-/* ✅ 输入框加宽、居中、圆角、美化 */
-input {
-    padding: 10px;
-    width: 80%;         /* 占容器宽度，让适配更柔和 */
-    max-width: 360px;   /* 控制最大宽度，防止过宽 */
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 15px;
-    text-align: center;
-    outline: none;
+*{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html,body{
+  height:100%;
+  margin:0;
+  color:var(--text);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, PingFang SC, "Helvetica Neue", Arial, "Noto Sans CJK SC", "微软雅黑", sans-serif;
 }
 
-/* ✅ 鼠标点击输入框时边框高亮 */
-input:focus {
-    border-color: #007bff;
+/* 背景与安全区 */
+.page{
+  min-height:100%;
+  padding: max(20px, env(safe-area-inset-top))
+           max(20px, env(safe-area-inset-right))
+           max(24px, env(safe-area-inset-bottom))
+           max(20px, env(safe-area-inset-left));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
 }
 
-/* ✅ 按钮美化 + 鼠标悬停效果 */
-button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 15px;
-    cursor: pointer;
-    margin-left: 8px;
+/* ===== 容器与标题 ===== */
+.container{
+  width:100%;
+  max-width: 640px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 18px;
 }
 
-button:hover {
-    background-color: #005dc1;
+h1{
+  margin: 2px 4px 14px;
+  font-size: clamp(20px, 5vw, 26px);
+  letter-spacing: 0.5px;
+  text-align:center;
 }
 
-/* 错误提示样式 */
-.error {
-    margin-top: 15px;
-    color: #d80000;
-    font-weight: bold;
+/* ===== 表单 ===== */
+.form{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin: 12px 4px 8px;
 }
 
-/* 查询结果区域 */
-.result {
-    margin-top: 22px;
-    line-height: 1.8;
-    font-size: 16px;
+input[type="text"]{
+  height: 48px;                 /* 手机端更易点 */
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(100,116,139,0.25);
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease, transform .04s ease;
+  font-size: 16px;              /* 避免 iOS 缩放 */
+}
+
+input::placeholder{ color: var(--muted); }
+
+input:focus{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+button{
+  height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.22);
+  transition: transform .06s ease, background .15s ease, box-shadow .15s ease;
+}
+
+button:active{ transform: translateY(1px) scale(.99); }
+button:focus-visible{ outline: none; box-shadow: 0 0 0 4px var(--ring); }
+button:hover{ background: var(--primary-press); }
+
+/* ===== 提示与结果 ===== */
+.alert{
+  margin: 16px 4px 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.alert.error{
+  background: rgba(220,38,38,.08);
+  color: var(--error);
+  border: 1px solid rgba(220,38,38,.25);
+}
+
+.card{
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid rgba(100,116,139,0.18);
+  box-shadow: var(--shadow);
+  padding: 14px 14px 8px;
+  margin: 14px 4px 2px;
+}
+
+.result .city{
+  margin: 0 0 8px;
+  font-size: clamp(18px, 4.6vw, 22px);
+  font-weight: 700;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat{
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(100,116,139,0.06);
+}
+
+.label{ color: var(--muted); font-size: 13px; }
+.value{ display:block; margin-top: 4px; font-weight: 600; }
+
+/* ===== 响应式断点 ===== */
+@media (min-width: 480px){
+  .container{ padding: 26px 24px; }
+  .form{ gap: 12px; }
+  input[type="text"],button{ height: 52px; }
+}
+
+@media (min-width: 768px){
+  .container{ padding: 30px 28px; }
+  .stats{ grid-template-columns: repeat(3, 1fr); }
 }

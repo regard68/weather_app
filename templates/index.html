@@ -2,38 +2,48 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>天气查询小助手</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <div class="container">
-    <h1>🌤 天气查询小助手</h1>
+  <div class="page">
+    <div class="container">
+      <h1>🌤 天气查询小助手</h1>
 
-    <form method="POST">
-      <input
-        type="text"
-        name="city"
-        placeholder="{{ hint }}"
-        value="{{ request.form.get('city','') }}"
-        required
-      />
-      <button type="submit">查询</button>
-    </form>
+      <form method="POST" class="form" novalidate>
+        <input
+          type="text"
+          name="city"
+          inputmode="latin-name"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          placeholder="请输入城市英文名，例如：beijing / shanghai / weifang"
+          value="{{ request.form.get('city','') }}"
+          aria-label="城市英文名"
+          required
+        />
+        <button type="submit" aria-label="查询天气">查询</button>
+      </form>
 
-    {% if weather %}
-      {% if weather.error %}
-        <p class="error">{{ weather.error }}</p>
-      {% else %}
-        <div class="result">
-          <h2>{{ weather.city }}</h2>
-          <p><strong>温度：</strong>{{ weather.temp }}°C</p>
-          <p><strong>天气：</strong>{{ weather.desc }}</p>
-          <p><strong>湿度：</strong>{{ weather.humidity }}%</p>
-          <p><strong>风向风速：</strong>{{ weather.wind }}</p>
-          <p><strong>更新时间：</strong>{{ weather.updated }}</p>
-        </div>
+      {% if weather %}
+        {% if weather.error %}
+          <p class="alert error" role="alert">{{ weather.error }}</p>
+        {% else %}
+          <div class="card result" role="region" aria-live="polite">
+            <h2 class="city">{{ weather.city }}</h2>
+            <div class="stats">
+              <div class="stat"><span class="label">温度</span><span class="value">{{ weather.temp }}°C</span></div>
+              <div class="stat"><span class="label">天气</span><span class="value">{{ weather.desc }}</span></div>
+              <div class="stat"><span class="label">湿度</span><span class="value">{{ weather.humidity }}%</span></div>
+              <div class="stat"><span class="label">风向风速</span><span class="value">{{ weather.wind }}</span></div>
+              <div class="stat"><span class="label">更新时间</span><span class="value">{{ weather.updated }}</span></div>
+            </div>
+          </div>
+        {% endif %}
       {% endif %}
-    {% endif %}
+    </div>
   </div>
 </body>
 </html>
